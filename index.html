@@ -1,269 +1,182 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MIZ Positive Vibes Engine</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>MIZ – Cultural Intelligence Engine</title>
 
 <style>
 body{
-margin:0;
-font-family:Poppins, sans-serif;
-background:linear-gradient(-45deg,#4facfe,#00f2fe,#43e97b,#38f9d7);
-background-size:400% 400%;
-animation:gradient 10s ease infinite;
-color:white;
+    margin:0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg,#1d2671,#c33764);
+    color:white;
 }
-
-@keyframes gradient{
-0%{background-position:0% 50%;}
-50%{background-position:100% 50%;}
-100%{background-position:0% 50%;}
+header{
+    padding:20px;
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+    background:rgba(0,0,0,0.4);
 }
-
 .container{
-max-width:850px;
-margin:40px auto;
-background:rgba(255,255,255,0.15);
-backdrop-filter:blur(15px);
-padding:25px;
-border-radius:20px;
-box-shadow:0 15px 40px rgba(0,0,0,0.3);
+    width:90%;
+    max-width:900px;
+    margin:30px auto;
+    background:rgba(255,255,255,0.1);
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 0 25px rgba(0,0,0,0.5);
 }
-
-input,textarea{
-width:100%;
-padding:10px;
-margin:8px 0;
-border:none;
-border-radius:10px;
+select, textarea, button{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
 }
-
+select, textarea{
+    background:white;
+    color:black;
+}
 button{
-padding:10px;
-border:none;
-border-radius:10px;
-background:#ff9800;
-color:white;
-font-weight:bold;
-cursor:pointer;
+    background:#ff9800;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
 }
-
-button:hover{background:#e68900;}
-
-.quote{
-font-size:22px;
-font-weight:bold;
-text-align:center;
-animation:glow 2s infinite alternate;
+button:hover{
+    background:#e65100;
 }
-
-@keyframes glow{
-from{text-shadow:0 0 10px #fff;}
-to{text-shadow:0 0 20px #ff00ff,0 0 30px #00ffff;}
+#result{
+    margin-top:20px;
+    padding:20px;
+    background:rgba(0,0,0,0.6);
+    border-radius:10px;
+    display:none;
 }
-
-.dark{
-background:#111 !important;
+.tag{
+    display:inline-block;
+    background:#4caf50;
+    padding:5px 10px;
+    border-radius:20px;
+    font-size:12px;
+    margin-bottom:10px;
 }
-
-.theme1{background:linear-gradient(45deg,#ff512f,#dd2476);}
-.theme2{background:linear-gradient(45deg,#00c6ff,#0072ff);}
-.theme3{background:linear-gradient(45deg,#11998e,#38ef7d);}
-.theme4{background:linear-gradient(45deg,#f7971e,#ffd200);}
-.theme5{background:linear-gradient(45deg,#654ea3,#eaafc8);}
 </style>
 </head>
 <body>
 
-<div class="container" id="loginBox">
-<h2>Login</h2>
-<input id="loginUser" placeholder="Username">
-<input type="password" id="loginPass" placeholder="Password">
-<button onclick="login()">Login</button>
-<button onclick="showRegister()">Register</button>
-</div>
+<header>MIZ – Smart Cultural Wisdom Platform</header>
 
-<div class="container" id="registerBox" style="display:none;">
-<h2>Register</h2>
-<input id="regUser" placeholder="Username">
-<input type="password" id="regPass" placeholder="Password">
-<button onclick="register()">Create Account</button>
-<button onclick="showLogin()">Back</button>
-</div>
+<div class="container">
 
-<div class="container" id="appBox" style="display:none;">
-<h2>🌟 Positive Vibes Dashboard</h2>
-<p id="welcome"></p>
+<h2>Describe Your Problem</h2>
 
-<button onclick="toggleDark()">Dark Mode</button>
-<button onclick="changeTheme()">Change Theme</button>
+<select id="book">
+<option value="gita">Bhagavad Gita</option>
+<option value="quran">Quran</option>
+<option value="bible">Bible</option>
+<option value="mahabharat">Mahabharat</option>
+</select>
 
-<textarea id="userText" rows="3" placeholder="Share your feelings..."></textarea>
-<button onclick="generateSolution()">Get Positive Guidance</button>
+<textarea id="problem" rows="4" placeholder="Example: I feel anxiety about exams and future..."></textarea>
 
-<div id="result" style="margin-top:15px;"></div>
+<button onclick="generateSolution()">Get Smart Guidance</button>
 
-<h3>Emotion Analytics</h3>
-<canvas id="emotionChart"></canvas>
+<div id="result"></div>
 
-<h3>Recent History</h3>
-<div id="history"></div>
-
-<button onclick="logout()" style="background:red;margin-top:15px;">Logout</button>
 </div>
 
 <script>
 
-function encrypt(p){return btoa(p);}
+// ==========================
+// LARGE SCALABLE DATABASE
+// ==========================
 
-function showRegister(){loginBox.style.display="none";registerBox.style.display="block";}
-function showLogin(){registerBox.style.display="none";loginBox.style.display="block";}
+const wisdomDatabase = {
 
-function register(){
-let u=regUser.value.trim();
-let p=encrypt(regPass.value.trim());
-let users=JSON.parse(localStorage.getItem("users"))||{};
-users[u]=p;
-localStorage.setItem("users",JSON.stringify(users));
-alert("Registered Successfully 🌟");
-showLogin();
-}
+gita: [
+{keywords:["stress","exam","career","future"],quote:"You have the right to perform your duty, but not to the fruits of your actions. (2.47)",meaning:"Focus on action not outcome.",application:"Prepare sincerely without result anxiety."},
+{keywords:["anger"],quote:"From anger comes delusion; from delusion, loss of memory.",meaning:"Anger clouds judgment.",application:"Pause before reacting emotionally."},
+{keywords:["confusion","decision"],quote:"Surrender unto Me alone.",meaning:"Trust divine wisdom.",application:"Take decisions with calm faith."},
+{keywords:["fear"],quote:"Be fearless in righteousness.",meaning:"Courage comes from dharma.",application:"Stand for what is right."},
+{keywords:["failure"],quote:"A person is made by his belief.",meaning:"Your thoughts shape you.",application:"Maintain positive belief."},
+{keywords:["discipline"],quote:"Self-control is strength.",meaning:"Control mind and senses.",application:"Avoid distractions."},
+{keywords:["attachment"],quote:"Detach from outcomes.",meaning:"Attachment causes suffering.",application:"Do your best and let go."}
+],
 
-function login(){
-let u=loginUser.value.trim();
-let p=encrypt(loginPass.value.trim());
-let users=JSON.parse(localStorage.getItem("users"))||{};
-if(users[u]===p){
-localStorage.setItem("loggedInUser",u);
-initApp();
-}else alert("Invalid Login");
-}
+quran: [
+{keywords:["hardship","pain"],quote:"Indeed, with hardship comes ease. (94:6)",meaning:"Difficulty is temporary.",application:"Stay patient in tough times."},
+{keywords:["fear","anxiety"],quote:"Allah is with those who are patient.",meaning:"Patience brings support.",application:"Trust the process."},
+{keywords:["guidance"],quote:"Allah guides whom He wills.",meaning:"Seek guidance sincerely.",application:"Pray for clarity."},
+{keywords:["anger"],quote:"Control anger and forgive.",meaning:"Forgiveness brings peace.",application:"Respond calmly."},
+{keywords:["gratitude"],quote:"If you are grateful, I will increase you.",meaning:"Gratitude multiplies blessings.",application:"Practice daily thankfulness."}
+],
 
-function logout(){localStorage.removeItem("loggedInUser");location.reload();}
+bible: [
+{keywords:["failure"],quote:"I can do all things through Christ who strengthens me.",meaning:"Faith gives strength.",application:"Retry with confidence."},
+{keywords:["worry","stress"],quote:"Cast all your anxiety on Him.",meaning:"Release your worries.",application:"Pray instead of overthinking."},
+{keywords:["love"],quote:"Love your neighbor as yourself.",meaning:"Kindness matters.",application:"Treat others respectfully."},
+{keywords:["forgiveness"],quote:"Forgive, and you will be forgiven.",meaning:"Let go of grudges.",application:"Choose peace."},
+{keywords:["hope"],quote:"Faith can move mountains.",meaning:"Believe strongly.",application:"Never lose hope."}
+],
 
-function initApp(){
-loginBox.style.display="none";
-appBox.style.display="block";
-let user=localStorage.getItem("loggedInUser");
-updateStreak();
-updateXP(0);
-welcome.innerHTML="Welcome <b>"+user+"</b> 🌈 Stay Positive!";
-loadHistory();
-loadChart();
-}
+mahabharat: [
+{keywords:["jealousy","comparison"],quote:"Jealousy destroys wisdom.",meaning:"Comparison causes suffering.",application:"Focus on self-growth."},
+{keywords:["anger"],quote:"Anger leads to destruction.",meaning:"Control emotions.",application:"Think before reacting."},
+{keywords:["ego"],quote:"Ego blinds the wise.",meaning:"Stay humble.",application:"Avoid arrogance."},
+{keywords:["duty"],quote:"Follow your dharma.",meaning:"Responsibility defines character.",application:"Do what is right."},
+{keywords:["loyalty"],quote:"True loyalty builds strength.",meaning:"Value relationships.",application:"Stay committed."}
+]
 
-window.onload=function(){if(localStorage.getItem("loggedInUser"))initApp();}
-
-/* ---------- 100+ QUOTES DATABASE ---------- */
-const spiritualQuotes={
-focus:["Stay disciplined.","Effort creates destiny.","Keep pushing forward.","Small steps matter.","Stay consistent.","Focus builds success.","Dream big.","Action beats fear.","Hard work wins.","Believe in growth."],
-anger:["Calm mind wins.","Pause and breathe.","Choose peace.","Respond wisely.","Forgive and grow.","Control brings power.","Silence is strength.","Stay composed.","Let go of ego.","Peace over pride."],
-sad:["This too shall pass.","You are stronger than pain.","Better days are coming.","Hope is alive.","You are not alone.","Keep faith.","Healing takes time.","Stay brave.","Smile again.","Trust the journey."],
-stress:["Breathe deeply.","Relax your mind.","Balance brings peace.","Slow down.","Rest and recharge.","Clear mind.","Stay centered.","Let thoughts flow.","Mindfulness works.","Calm energy."],
-faith:["Trust divine timing.","Faith over fear.","Believe deeply.","Stay grateful.","Inner power grows.","Light guides you.","Devotion strengthens.","Hope never dies.","Positive energy flows.","Keep believing."]
 };
 
-/* ---------- KEYWORDS (100+) ---------- */
-const emotionKeywords={
-focus:["exam","study","goal","career","future","marks","college","discipline","hardwork","result","success","focus","target","aim","plan","achievement","improve","growth","practice","learn"],
-anger:["anger","fight","hate","irritate","frustrate","annoyed","rage","ego","argument","shout","upset","mad","temper","complain","criticize","stressful fight","insult"],
-sad:["sad","cry","lonely","breakup","hurt","pain","alone","missing","loss","fail","failure","heart","tired","weak","down","demotivated"],
-stress:["stress","anxiety","pressure","tension","worry","overthinking","fear","panic","burden","confused","nervous","disturbed"],
-faith:["faith","god","pray","hope","believe","devotion","spiritual","trust","divine","blessing","gratitude","positive","energy"]
-};
-
-function detectEmotion(text){
-for(let e in emotionKeywords){
-if(emotionKeywords[e].some(word=>text.includes(word))) return e;
-}
-return "faith";
-}
+// ==========================
+// SMART MATCH ENGINE
+// ==========================
 
 function generateSolution(){
-let text=userText.value.toLowerCase();
-let emotion=detectEmotion(text);
-let quotes=spiritualQuotes[emotion];
-let randomQuote=quotes[Math.floor(Math.random()*quotes.length)];
+const book = document.getElementById("book").value;
+const text = document.getElementById("problem").value.toLowerCase();
+const resultDiv = document.getElementById("result");
 
-result.innerHTML="<div class='quote'>"+randomQuote+"</div><br><b>Emotion:</b> "+emotion.toUpperCase()+" 🌟";
+let bestMatch=null;
+let maxScore=0;
 
-saveHistory(text,emotion);
-updateXP(10);
-loadHistory();
-loadChart();
+wisdomDatabase[book].forEach(entry=>{
+let score=0;
+entry.keywords.forEach(word=>{
+if(text.includes(word)){
+score+=2;
 }
-
-/* ---------- XP + LEVEL ---------- */
-function updateXP(points){
-let user=localStorage.getItem("loggedInUser");
-let xp=parseInt(localStorage.getItem("xp_"+user)||0);
-xp+=points;
-localStorage.setItem("xp_"+user,xp);
-let level=Math.floor(xp/50);
-welcome.innerHTML="Welcome <b>"+user+"</b> 🌈 | XP: "+xp+" | Level: "+level;
-checkBadges(xp);
-}
-
-function checkBadges(xp){
-if(xp==100) alert("🔥 Bronze Achiever");
-if(xp==300) alert("🔥 Silver Master");
-if(xp==500) alert("🔥 Gold Champion");
-}
-
-/* ---------- STREAK ---------- */
-function updateStreak(){
-let user=localStorage.getItem("loggedInUser");
-let today=new Date().toDateString();
-let last=localStorage.getItem("last_"+user);
-let streak=parseInt(localStorage.getItem("streak_"+user)||0);
-if(last!==today){
-streak++;
-localStorage.setItem("streak_"+user,streak);
-localStorage.setItem("last_"+user,today);
-}
-}
-
-/* ---------- HISTORY ---------- */
-function saveHistory(text,emotion){
-let user=localStorage.getItem("loggedInUser");
-let data=JSON.parse(localStorage.getItem("history_"+user))||[];
-data.push({emotion,date:new Date().toLocaleDateString()});
-localStorage.setItem("history_"+user,JSON.stringify(data));
-}
-
-function loadHistory(){
-let user=localStorage.getItem("loggedInUser");
-let data=JSON.parse(localStorage.getItem("history_"+user))||[];
-history.innerHTML="";
-data.slice(-5).reverse().forEach(d=>{
-history.innerHTML+="<p>"+d.date+" - "+d.emotion+"</p>";
 });
+if(score>maxScore){
+maxScore=score;
+bestMatch=entry;
 }
-
-/* ---------- CHART ---------- */
-function loadChart(){
-let user=localStorage.getItem("loggedInUser");
-let data=JSON.parse(localStorage.getItem("history_"+user))||[];
-let count={focus:0,anger:0,sad:0,stress:0,faith:0};
-data.forEach(d=>{if(count[d.emotion]!=undefined)count[d.emotion]++;});
-
-new Chart(document.getElementById("emotionChart"),{
-type:'bar',
-data:{labels:Object.keys(count),
-datasets:[{label:"Emotion Frequency",data:Object.values(count)}]}
 });
+
+if(bestMatch){
+resultDiv.innerHTML=`
+<div class="tag">High Confidence Match</div>
+<h3>Guidance:</h3>
+<p><b>Quote:</b> ${bestMatch.quote}</p>
+<p><b>Meaning:</b> ${bestMatch.meaning}</p>
+<p><b>Real Life Application:</b> ${bestMatch.application}</p>
+`;
+}else{
+resultDiv.innerHTML=`
+<h3>General Guidance:</h3>
+<p>Stay patient, act ethically, and trust that clarity will come with time.</p>
+`;
 }
 
-/* ---------- THEME + DARK ---------- */
-function toggleDark(){document.body.classList.toggle("dark");}
-
-function changeTheme(){
-let themes=["theme1","theme2","theme3","theme4","theme5"];
-let random=themes[Math.floor(Math.random()*themes.length)];
-document.body.className=random;
+resultDiv.style.display="block";
 }
+
 </script>
 
 </body>
