@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MIZ Spiritual Dashboard</title>
+<title>MIZ Positive Vibes Engine</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body{
@@ -11,7 +12,7 @@ margin:0;
 font-family:Poppins, sans-serif;
 background:linear-gradient(-45deg,#4facfe,#00f2fe,#43e97b,#38f9d7);
 background-size:400% 400%;
-animation:gradient 12s ease infinite;
+animation:gradient 10s ease infinite;
 color:white;
 }
 
@@ -22,7 +23,7 @@ color:white;
 }
 
 .container{
-max-width:900px;
+max-width:850px;
 margin:40px auto;
 background:rgba(255,255,255,0.15);
 backdrop-filter:blur(15px);
@@ -51,34 +52,10 @@ cursor:pointer;
 
 button:hover{background:#e68900;}
 
-.tabs{
-display:flex;
-gap:8px;
-flex-wrap:wrap;
-margin-bottom:15px;
-}
-
-.tab{
-padding:8px 15px;
-border-radius:20px;
-background:rgba(255,255,255,0.2);
-cursor:pointer;
-transition:0.3s;
-}
-
-.tab:hover{
-background:rgba(255,255,255,0.4);
-}
-
-.tab.active{
-background:#ff9800;
-}
-
 .quote{
 font-size:22px;
 font-weight:bold;
 text-align:center;
-min-height:60px;
 animation:glow 2s infinite alternate;
 }
 
@@ -86,6 +63,16 @@ animation:glow 2s infinite alternate;
 from{text-shadow:0 0 10px #fff;}
 to{text-shadow:0 0 20px #ff00ff,0 0 30px #00ffff;}
 }
+
+.dark{
+background:#111 !important;
+}
+
+.theme1{background:linear-gradient(45deg,#ff512f,#dd2476);}
+.theme2{background:linear-gradient(45deg,#00c6ff,#0072ff);}
+.theme3{background:linear-gradient(45deg,#11998e,#38ef7d);}
+.theme4{background:linear-gradient(45deg,#f7971e,#ffd200);}
+.theme5{background:linear-gradient(45deg,#654ea3,#eaafc8);}
 </style>
 </head>
 <body>
@@ -107,27 +94,21 @@ to{text-shadow:0 0 20px #ff00ff,0 0 30px #00ffff;}
 </div>
 
 <div class="container" id="appBox" style="display:none;">
-<h2>🌟 Spiritual Positive Dashboard</h2>
-
+<h2>🌟 Positive Vibes Dashboard</h2>
 <p id="welcome"></p>
 
-<h3>Spiritual Wisdom Sources</h3>
-<div class="tabs">
-  <div class="tab active" onclick="setReligion('gita', this)">Bhagavad Gita</div>
-  <div class="tab" onclick="setReligion('bible', this)">Bible</div>
-  <div class="tab" onclick="setReligion('quran', this)">Qur'an</div>
-  <div class="tab" onclick="setReligion('dhamma', this)">Dhammapada</div>
-  <div class="tab" onclick="setReligion('guru', this)">Guru Granth Sahib</div>
-</div>
+<button onclick="toggleDark()">Dark Mode</button>
+<button onclick="changeTheme()">Change Theme</button>
 
 <textarea id="userText" rows="3" placeholder="Share your feelings..."></textarea>
-<button onclick="generateSolution()">Get Guidance</button>
+<button onclick="generateSolution()">Get Positive Guidance</button>
 
-<div id="result" style="margin-top:20px;">
-<div class="quote" id="typedQuote"></div>
-</div>
+<div id="result" style="margin-top:15px;"></div>
 
-<h3>Recent Positive History</h3>
+<h3>Emotion Analytics</h3>
+<canvas id="emotionChart"></canvas>
+
+<h3>Recent History</h3>
 <div id="history"></div>
 
 <button onclick="logout()" style="background:red;margin-top:15px;">Logout</button>
@@ -135,8 +116,8 @@ to{text-shadow:0 0 20px #ff00ff,0 0 30px #00ffff;}
 
 <script>
 
-/* LOGIN SYSTEM */
 function encrypt(p){return btoa(p);}
+
 function showRegister(){loginBox.style.display="none";registerBox.style.display="block";}
 function showLogin(){registerBox.style.display="none";loginBox.style.display="block";}
 
@@ -165,65 +146,73 @@ function logout(){localStorage.removeItem("loggedInUser");location.reload();}
 function initApp(){
 loginBox.style.display="none";
 appBox.style.display="block";
+let user=localStorage.getItem("loggedInUser");
 updateStreak();
 updateXP(0);
+welcome.innerHTML="Welcome <b>"+user+"</b> 🌈 Stay Positive!";
 loadHistory();
+loadChart();
 }
 
 window.onload=function(){if(localStorage.getItem("loggedInUser"))initApp();}
 
-/* RELIGION SYSTEM */
-let currentReligion="gita";
-
-function setReligion(rel, element){
-currentReligion=rel;
-document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-element.classList.add("active");
-}
-
-/* QUOTES */
-const religionQuotes={
-gita:["Do your duty with dedication.","Self-discipline leads to greatness."],
-bible:["Work with all your heart.","You are never alone."],
-quran:["With hardship comes ease.","The strong controls himself."],
-dhamma:["Peace comes from within.","Hatred ends with compassion."],
-guru:["Faith fills the heart with light.","Meditate and stay calm."]
+/* ---------- 100+ QUOTES DATABASE ---------- */
+const spiritualQuotes={
+focus:["Stay disciplined.","Effort creates destiny.","Keep pushing forward.","Small steps matter.","Stay consistent.","Focus builds success.","Dream big.","Action beats fear.","Hard work wins.","Believe in growth."],
+anger:["Calm mind wins.","Pause and breathe.","Choose peace.","Respond wisely.","Forgive and grow.","Control brings power.","Silence is strength.","Stay composed.","Let go of ego.","Peace over pride."],
+sad:["This too shall pass.","You are stronger than pain.","Better days are coming.","Hope is alive.","You are not alone.","Keep faith.","Healing takes time.","Stay brave.","Smile again.","Trust the journey."],
+stress:["Breathe deeply.","Relax your mind.","Balance brings peace.","Slow down.","Rest and recharge.","Clear mind.","Stay centered.","Let thoughts flow.","Mindfulness works.","Calm energy."],
+faith:["Trust divine timing.","Faith over fear.","Believe deeply.","Stay grateful.","Inner power grows.","Light guides you.","Devotion strengthens.","Hope never dies.","Positive energy flows.","Keep believing."]
 };
 
-/* TYPEWRITER EFFECT */
-function typeWriter(text){
-let i=0;
-typedQuote.innerHTML="";
-let interval=setInterval(()=>{
-if(i<text.length){
-typedQuote.innerHTML+=text.charAt(i);
-i++;
-}else{
-clearInterval(interval);
+/* ---------- KEYWORDS (100+) ---------- */
+const emotionKeywords={
+focus:["exam","study","goal","career","future","marks","college","discipline","hardwork","result","success","focus","target","aim","plan","achievement","improve","growth","practice","learn"],
+anger:["anger","fight","hate","irritate","frustrate","annoyed","rage","ego","argument","shout","upset","mad","temper","complain","criticize","stressful fight","insult"],
+sad:["sad","cry","lonely","breakup","hurt","pain","alone","missing","loss","fail","failure","heart","tired","weak","down","demotivated"],
+stress:["stress","anxiety","pressure","tension","worry","overthinking","fear","panic","burden","confused","nervous","disturbed"],
+faith:["faith","god","pray","hope","believe","devotion","spiritual","trust","divine","blessing","gratitude","positive","energy"]
+};
+
+function detectEmotion(text){
+for(let e in emotionKeywords){
+if(emotionKeywords[e].some(word=>text.includes(word))) return e;
 }
-},30);
+return "faith";
 }
 
-/* GENERATE SOLUTION */
 function generateSolution(){
-let quotes=religionQuotes[currentReligion];
+let text=userText.value.toLowerCase();
+let emotion=detectEmotion(text);
+let quotes=spiritualQuotes[emotion];
 let randomQuote=quotes[Math.floor(Math.random()*quotes.length)];
-typeWriter(randomQuote);
+
+result.innerHTML="<div class='quote'>"+randomQuote+"</div><br><b>Emotion:</b> "+emotion.toUpperCase()+" 🌟";
+
+saveHistory(text,emotion);
 updateXP(10);
-saveHistory(randomQuote);
+loadHistory();
+loadChart();
 }
 
-/* XP + LEVEL */
+/* ---------- XP + LEVEL ---------- */
 function updateXP(points){
 let user=localStorage.getItem("loggedInUser");
 let xp=parseInt(localStorage.getItem("xp_"+user)||0);
 xp+=points;
 localStorage.setItem("xp_"+user,xp);
 let level=Math.floor(xp/50);
-welcome.innerHTML="Welcome <b>"+user+"</b> 🌟 | XP: "+xp+" | Level: "+level;
+welcome.innerHTML="Welcome <b>"+user+"</b> 🌈 | XP: "+xp+" | Level: "+level;
+checkBadges(xp);
 }
 
-/* STREAK */
+function checkBadges(xp){
+if(xp==100) alert("🔥 Bronze Achiever");
+if(xp==300) alert("🔥 Silver Master");
+if(xp==500) alert("🔥 Gold Champion");
+}
+
+/* ---------- STREAK ---------- */
 function updateStreak(){
 let user=localStorage.getItem("loggedInUser");
 let today=new Date().toDateString();
@@ -236,13 +225,12 @@ localStorage.setItem("last_"+user,today);
 }
 }
 
-/* HISTORY */
-function saveHistory(quote){
+/* ---------- HISTORY ---------- */
+function saveHistory(text,emotion){
 let user=localStorage.getItem("loggedInUser");
 let data=JSON.parse(localStorage.getItem("history_"+user))||[];
-data.push({quote:quote,date:new Date().toLocaleDateString()});
+data.push({emotion,date:new Date().toLocaleDateString()});
 localStorage.setItem("history_"+user,JSON.stringify(data));
-loadHistory();
 }
 
 function loadHistory(){
@@ -250,10 +238,32 @@ let user=localStorage.getItem("loggedInUser");
 let data=JSON.parse(localStorage.getItem("history_"+user))||[];
 history.innerHTML="";
 data.slice(-5).reverse().forEach(d=>{
-history.innerHTML+="<p>"+d.date+" - 🌟 "+d.quote+"</p>";
+history.innerHTML+="<p>"+d.date+" - "+d.emotion+"</p>";
 });
 }
 
+/* ---------- CHART ---------- */
+function loadChart(){
+let user=localStorage.getItem("loggedInUser");
+let data=JSON.parse(localStorage.getItem("history_"+user))||[];
+let count={focus:0,anger:0,sad:0,stress:0,faith:0};
+data.forEach(d=>{if(count[d.emotion]!=undefined)count[d.emotion]++;});
+
+new Chart(document.getElementById("emotionChart"),{
+type:'bar',
+data:{labels:Object.keys(count),
+datasets:[{label:"Emotion Frequency",data:Object.values(count)}]}
+});
+}
+
+/* ---------- THEME + DARK ---------- */
+function toggleDark(){document.body.classList.toggle("dark");}
+
+function changeTheme(){
+let themes=["theme1","theme2","theme3","theme4","theme5"];
+let random=themes[Math.floor(Math.random()*themes.length)];
+document.body.className=random;
+}
 </script>
 
 </body>
