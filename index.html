@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIZ Spiritual Dashboard</title>
+
+<style>
+body{
+margin:0;
+font-family:Poppins, sans-serif;
+background:linear-gradient(-45deg,#4facfe,#00f2fe,#43e97b,#38f9d7);
+background-size:400% 400%;
+animation:gradient 12s ease infinite;
+color:white;
+}
+
+@keyframes gradient{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+}
+
+.container{
+max-width:900px;
+margin:40px auto;
+background:rgba(255,255,255,0.15);
+backdrop-filter:blur(15px);
+padding:25px;
+border-radius:20px;
+box-shadow:0 15px 40px rgba(0,0,0,0.3);
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin:8px 0;
+border:none;
+border-radius:10px;
+}
+
+button{
+padding:10px;
+border:none;
+border-radius:10px;
+background:#ff9800;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{background:#e68900;}
+
+.tabs{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-bottom:15px;
+}
+
+.tab{
+padding:8px 15px;
+border-radius:20px;
+background:rgba(255,255,255,0.2);
+cursor:pointer;
+transition:0.3s;
+}
+
+.tab:hover{
+background:rgba(255,255,255,0.4);
+}
+
+.tab.active{
+background:#ff9800;
+}
+
+.quote{
+font-size:22px;
+font-weight:bold;
+text-align:center;
+min-height:60px;
+animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+from{text-shadow:0 0 10px #fff;}
+to{text-shadow:0 0 20px #ff00ff,0 0 30px #00ffff;}
+}
+</style>
+</head>
+<body>
+
+<div class="container" id="loginBox">
+<h2>Login</h2>
+<input id="loginUser" placeholder="Username">
+<input type="password" id="loginPass" placeholder="Password">
+<button onclick="login()">Login</button>
+<button onclick="showRegister()">Register</button>
+</div>
+
+<div class="container" id="registerBox" style="display:none;">
+<h2>Register</h2>
+<input id="regUser" placeholder="Username">
+<input type="password" id="regPass" placeholder="Password">
+<button onclick="register()">Create Account</button>
+<button onclick="showLogin()">Back</button>
+</div>
+
+<div class="container" id="appBox" style="display:none;">
+<h2>🌟 Spiritual Positive Dashboard</h2>
+
+<p id="welcome"></p>
+
+<h3>Spiritual Wisdom Sources</h3>
+<div class="tabs">
+  <div class="tab active" onclick="setReligion('gita', this)">Bhagavad Gita</div>
+  <div class="tab" onclick="setReligion('bible', this)">Bible</div>
+  <div class="tab" onclick="setReligion('quran', this)">Qur'an</div>
+  <div class="tab" onclick="setReligion('dhamma', this)">Dhammapada</div>
+  <div class="tab" onclick="setReligion('guru', this)">Guru Granth Sahib</div>
+</div>
+
+<textarea id="userText" rows="3" placeholder="Share your feelings..."></textarea>
+<button onclick="generateSolution()">Get Guidance</button>
+
+<div id="result" style="margin-top:20px;">
+<div class="quote" id="typedQuote"></div>
+</div>
+
+<h3>Recent Positive History</h3>
+<div id="history"></div>
+
+<button onclick="logout()" style="background:red;margin-top:15px;">Logout</button>
+</div>
+
+<script>
+
+/* LOGIN SYSTEM */
+function encrypt(p){return btoa(p);}
+function showRegister(){loginBox.style.display="none";registerBox.style.display="block";}
+function showLogin(){registerBox.style.display="none";loginBox.style.display="block";}
+
+function register(){
+let u=regUser.value.trim();
+let p=encrypt(regPass.value.trim());
+let users=JSON.parse(localStorage.getItem("users"))||{};
+users[u]=p;
+localStorage.setItem("users",JSON.stringify(users));
+alert("Registered Successfully 🌟");
+showLogin();
+}
+
+function login(){
+let u=loginUser.value.trim();
+let p=encrypt(loginPass.value.trim());
+let users=JSON.parse(localStorage.getItem("users"))||{};
+if(users[u]===p){
+localStorage.setItem("loggedInUser",u);
+initApp();
+}else alert("Invalid Login");
+}
+
+function logout(){localStorage.removeItem("loggedInUser");location.reload();}
+
+function initApp(){
+loginBox.style.display="none";
+appBox.style.display="block";
+updateStreak();
+updateXP(0);
+loadHistory();
+}
+
+window.onload=function(){if(localStorage.getItem("loggedInUser"))initApp();}
+
+/* RELIGION SYSTEM */
+let currentReligion="gita";
+
+function setReligion(rel, element){
+currentReligion=rel;
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+element.classList.add("active");
+}
+
+/* QUOTES */
+const religionQuotes={
+gita:["Do your duty with dedication.","Self-discipline leads to greatness."],
+bible:["Work with all your heart.","You are never alone."],
+quran:["With hardship comes ease.","The strong controls himself."],
+dhamma:["Peace comes from within.","Hatred ends with compassion."],
+guru:["Faith fills the heart with light.","Meditate and stay calm."]
+};
+
+/* TYPEWRITER EFFECT */
+function typeWriter(text){
+let i=0;
+typedQuote.innerHTML="";
+let interval=setInterval(()=>{
+if(i<text.length){
+typedQuote.innerHTML+=text.charAt(i);
+i++;
+}else{
+clearInterval(interval);
+}
+},30);
+}
+
+/* GENERATE SOLUTION */
+function generateSolution(){
+let quotes=religionQuotes[currentReligion];
+let randomQuote=quotes[Math.floor(Math.random()*quotes.length)];
+typeWriter(randomQuote);
+updateXP(10);
+saveHistory(randomQuote);
+}
+
+/* XP + LEVEL */
+function updateXP(points){
+let user=localStorage.getItem("loggedInUser");
+let xp=parseInt(localStorage.getItem("xp_"+user)||0);
+xp+=points;
+localStorage.setItem("xp_"+user,xp);
+let level=Math.floor(xp/50);
+welcome.innerHTML="Welcome <b>"+user+"</b> 🌟 | XP: "+xp+" | Level: "+level;
+}
+
+/* STREAK */
+function updateStreak(){
+let user=localStorage.getItem("loggedInUser");
+let today=new Date().toDateString();
+let last=localStorage.getItem("last_"+user);
+let streak=parseInt(localStorage.getItem("streak_"+user)||0);
+if(last!==today){
+streak++;
+localStorage.setItem("streak_"+user,streak);
+localStorage.setItem("last_"+user,today);
+}
+}
+
+/* HISTORY */
+function saveHistory(quote){
+let user=localStorage.getItem("loggedInUser");
+let data=JSON.parse(localStorage.getItem("history_"+user))||[];
+data.push({quote:quote,date:new Date().toLocaleDateString()});
+localStorage.setItem("history_"+user,JSON.stringify(data));
+loadHistory();
+}
+
+function loadHistory(){
+let user=localStorage.getItem("loggedInUser");
+let data=JSON.parse(localStorage.getItem("history_"+user))||[];
+history.innerHTML="";
+data.slice(-5).reverse().forEach(d=>{
+history.innerHTML+="<p>"+d.date+" - 🌟 "+d.quote+"</p>";
+});
+}
+
+</script>
+
+</body>
+</html>
